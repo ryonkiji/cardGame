@@ -34,6 +34,23 @@ public class BlackJackInputUtil {
 	}
 
 	/**
+	 * Enterを求めるメソッド
+	 *
+	 * @return
+	 * @throws SystemErrorException
+	 */
+	public static void getInputEnter() throws SystemErrorException {
+
+		try {
+			// 入力受付
+			System.out.println("Enterを入力して次へ進んで下さい。");
+			String input = br.readLine();
+		} catch (IOException e) {
+			throw new SystemErrorException();
+		}
+	}
+
+	/**
 	 * 入力値を返却
 	 *
 	 * @return

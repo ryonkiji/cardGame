@@ -6,20 +6,35 @@ import java.util.List;
 
 import cardgame.Consts;
 import cardgame.card.Card;
-import cardgame.player.BlackJackPlayer;
+import cardgame.deck.Deck;
+import cardgame.exception.SystemErrorException;
+import cardgame.player.BlackjackPlayer;
+import cardgame.player.BlackjackPlayerList;
 import cardgame.util.BlackJackCalcUtil;
+import cardgame.util.BlackJackInputUtil;
 
 public class Dealer {
 
 	/**
-	 * BlackJackPlayer
+	 * コンストラクタ
+	 *
+	 * @param deck
+	 * @param playerList
 	 */
-	private BlackJackPlayer player;
+	public Dealer(Deck deck, BlackjackPlayerList playerList) {
+		this.deck = deck;
+		this.playerList = playerList;
+	}
 
 	/**
-	 * 山札
+	 * 山札クラス
 	 */
-	private List<Card> deck = new ArrayList<>();
+	private Deck deck;
+
+	/**
+	 * PlayerList
+	 */
+	private BlackjackPlayerList playerList;
 
 	/**
 	 * 手札
@@ -31,16 +46,24 @@ public class Dealer {
 	 */
 	private int score = 0;
 
-	public List<Card> getDeck() {
+	public Deck getDeck() {
 		return deck;
 	}
 
-	public void setDeck(List<Card> deck) {
+	public void setDeck(Deck deck) {
 		this.deck = deck;
 	}
 
-	public void setDeck(Card card) {
-		this.deck.add(card);
+	public BlackjackPlayerList getPlayerList() {
+		return playerList;
+	}
+
+	public void setPlayerList(BlackjackPlayerList playerList) {
+		this.playerList = playerList;
+	}
+
+	public void setHand(List<Card> hand) {
+		this.hand = hand;
 	}
 
 	public List<Card> getHand() {
@@ -59,23 +82,21 @@ public class Dealer {
 		this.score = score;
 	}
 
-	public BlackJackPlayer getPlayer() {
-		return player;
-	}
-
-	public void setPlayer(BlackJackPlayer player) {
-		this.player = player;
-	}
-
 	/**
 	 * 山札シャッフル
+	 *
+	 * @param deck
 	 */
 	public void shuffle() {
-		Collections.shuffle(deck);
+		Collections.shuffle(deck.getDeck());
 	}
 
 	/**
 	 * カード分配
+	 *
+	 * @param deck
+	 *
+	 * @param playerList
 	 */
 	public void distribute() {
 
@@ -85,23 +106,25 @@ public class Dealer {
 		}
 
 		// プレイヤーに手札を配る
-		for (BlackJackPlayer p : player.getPlayerList()) {
+		for (BlackjackPlayer player : playerList.getPlayerList()) {
 			for (int j = 0; j < Consts.BLACK_JACK_HAND; j++) {
-				p.setHand(pick());
+				player.setHand(pick());
 			}
 		}
 	}
 
 	/**
 	 * デッキの先頭からカードを一枚取り出す
+	 *
+	 * @param deck
 	 */
 	public Card pick() {
 
 		// デッキの先頭からカードを一枚取り出す
-		Card card = getDeck().get(0);
+		Card card = deck.getDeck().get(0);
 
 		// 山札からカードを一枚削除する
-		getDeck().remove(0);
+		deck.getDeck().remove(0);
 
 		return card;
 	}
@@ -118,8 +141,10 @@ public class Dealer {
 
 	/**
 	 * ディーラーの動作
+	 * 
+	 * @throws SystemErrorException
 	 */
-	public void action() {
+	public void action() throws SystemErrorException {
 
 		// 手札の確認
 		open();
@@ -148,6 +173,9 @@ public class Dealer {
 				isContinue = false;
 			}
 		}
+
+		// Enterを押して次へ進む
+		BlackJackInputUtil.getInputEnter();
 
 		System.out.print(Consts.CRLF);
 	}
@@ -202,41 +230,41 @@ public class Dealer {
 		// ディーラーがバーストしていない場合
 		if (dealerPoint <= 21) {
 
-			for (BlackJackPlayer p : player.getPlayerList()) {
+			for (BlackjackPlayer player : playerList.getPlayerList()) {
 
 				// 得点が21を超える場合バースト
-				if (p.getScore() > 21) {
-					p.setWinLoseCode(Consts.LOSE_CODE);
+				if (player.getScore() > 21) {
+					player.setWinLoseCode(Consts.LOSE_CODE);
 				} else {
 					// 勝利
-					if (dealerPoint < p.getScore()) {
-						p.setWinLoseCode(Consts.WIN_CODE);
-						p.setChip(p.getChip() + p.getBet() * 2);
+					if (dealerPoint < player.getScore()) {
+						player.setWinLoseCode(Consts.WIN_CODE);
+						player.setChip(player.getChip() + player.getBet() * 2);
 					}
 					// 敗北
-					else if (dealerPoint > p.getScore()) {
-						p.setWinLoseCode(Consts.LOSE_CODE);
+					else if (dealerPoint > player.getScore()) {
+						player.setWinLoseCode(Consts.LOSE_CODE);
 					}
 					// 引き分け
 					else {
-						p.setWinLoseCode(Consts.DROW_CODE);
-						p.setChip(p.getChip() + p.getBet());
+						player.setWinLoseCode(Consts.DROW_CODE);
+						player.setChip(player.getChip() + player.getBet());
 					}
 				}
 			}
 		}
 		// ディーラーがバーストしている場合
 		else {
-			for (BlackJackPlayer p : player.getPlayerList()) {
+			for (BlackjackPlayer player : playerList.getPlayerList()) {
 
 				// 21を超えていなければ勝ち
-				if (p.getScore() <= 21) {
-					p.setWinLoseCode(Consts.WIN_CODE);
-					p.setChip(p.getChip() + p.getBet() * 2);
+				if (player.getScore() <= 21) {
+					player.setWinLoseCode(Consts.WIN_CODE);
+					player.setChip(player.getChip() + player.getBet() * 2);
 				}
 				// 21を超えていれば負け
 				else {
-					p.setWinLoseCode(Consts.LOSE_CODE);
+					player.setWinLoseCode(Consts.LOSE_CODE);
 				}
 			}
 		}

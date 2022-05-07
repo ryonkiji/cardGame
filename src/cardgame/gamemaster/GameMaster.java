@@ -36,7 +36,7 @@ public abstract class GameMaster {
 			init();
 
 			// ゲーム準備
-			prepare();
+			// prepare();
 
 			// ゲーム開始
 			start();
@@ -64,15 +64,7 @@ public abstract class GameMaster {
 	/**
 	 * ゲーム準備
 	 */
-	/**
-	 * ゲーム準備
-	 */
-	abstract void prepare();
-
-	/**
-	 * ルール作成
-	 */
-	abstract void createRule();
+	// abstract void prepare();
 
 	/**
 	 * 山札作成
