@@ -1,5 +1,9 @@
 package cardgame.player;
 
+import java.util.List;
+
+import cardgame.card.Card;
+import cardgame.deck.Deck;
 import cardgame.exception.SystemErrorException;
 import cardgame.util.BlackJackCalcUtil;
 import cardgame.util.BlackJackInputUtil;
@@ -13,19 +17,28 @@ import cardgame.util.BlackJackInputUtil;
 public class BlackjackPlayerUser extends BlackjackPlayer {
 
 	/**
+	 * コンストラクタ
+	 *
+	 * @param name
+	 */
+	public BlackjackPlayerUser(String name) {
+		super(name);
+	}
+
+	/**
 	 * 賭け金を決める
 	 *
 	 * @param player
 	 * @throws SystemErrorException
 	 */
 	@Override
-	public void bet(BlackjackPlayer player) throws SystemErrorException {
+	public void bet() throws SystemErrorException {
 
 		// 賭け金の入力を受け付ける
-		player.setBet(BlackJackInputUtil.getInputBet());
+		setBet(BlackJackInputUtil.getInputBet());
 
 		// チップに、ベットを引いた値をセット
-		player.setChip(player.getChip() - player.getBet());
+		setChip(getChip() - getBet());
 	}
 
 	/**
@@ -35,25 +48,25 @@ public class BlackjackPlayerUser extends BlackjackPlayer {
 	 * @throws SystemErrorException
 	 */
 	@Override
-	public void choice(BlackjackPlayer player) throws SystemErrorException {
+	public void choice(Deck deck) throws SystemErrorException {
 
 		// ヒットかステイか入力を受け付ける
 		String input = BlackJackInputUtil.getInputParam();
 
-		boolean isContinue = isContinue(input, player);
+		boolean isContinue = isContinue(input, getScore(), deck.getDeck());
 
 		while (isContinue) {
 
 			// カードを引く
-			player.setHand(getDealer().pick());
+			setHand(deck.pick());
 
 			// 引いたカードの確認
-			checkPickCard(player);
+			checkPickCard();
 
 			// 得点の確認
-			calc(player);
+			calc();
 
-			if (player.getScore() <= 21) {
+			if (getScore() <= 21) {
 				// // カードを引くかどうかの判定
 				input = BlackJackInputUtil.getInputParam();
 			} else {
@@ -61,7 +74,7 @@ public class BlackjackPlayerUser extends BlackjackPlayer {
 			}
 
 			// 継続か判定
-			isContinue = isContinue(input, player);
+			isContinue = isContinue(input, getScore(), deck.getDeck());
 		}
 	}
 
@@ -70,11 +83,12 @@ public class BlackjackPlayerUser extends BlackjackPlayer {
 	 * カードを引くか引かないかを判定
 	 *
 	 * @param input
-	 * @param player
+	 * @param score
+	 * @param deck
 	 * @return
 	 * @throws SystemErrorException
 	 */
-	public boolean isContinue(String input, BlackjackPlayer player) throws SystemErrorException {
+	public boolean isContinue(String input, int score, List<Card> deck) throws SystemErrorException {
 
 		boolean isContinue = false;
 
@@ -85,11 +99,11 @@ public class BlackjackPlayerUser extends BlackjackPlayer {
 		// 確率計算（隠しコマンド）
 		else if ("cheat".equals(input)) {
 
-			double probability = BlackJackCalcUtil.calcProbability(getDealer().getDeck().getDeck(), player.getScore());
+			double probability = BlackJackCalcUtil.calcProbability(deck, score);
 			System.out.println("バースト確率：" + probability + "%");
 
 			input = BlackJackInputUtil.getInputParam();
-			return isContinue(input, player);
+			return isContinue(input, score, deck);
 		}
 
 		return isContinue;

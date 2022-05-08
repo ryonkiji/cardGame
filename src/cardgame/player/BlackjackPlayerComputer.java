@@ -1,6 +1,7 @@
 package cardgame.player;
 
-import cardgame.Consts;
+import cardgame.consts.BlackjackSetting;
+import cardgame.deck.Deck;
 import cardgame.exception.SystemErrorException;
 import cardgame.util.BlackJackInputUtil;
 
@@ -13,19 +14,28 @@ import cardgame.util.BlackJackInputUtil;
 public class BlackjackPlayerComputer extends BlackjackPlayer {
 
 	/**
+	 * コンストラクタ
+	 *
+	 * @param name
+	 */
+	public BlackjackPlayerComputer(String name) {
+		super(name);
+	}
+
+	/**
 	 * 賭け金を決める
 	 *
 	 * @param player
 	 * @throws SystemErrorException
 	 */
 	@Override
-	public void bet(BlackjackPlayer player) {
+	public void bet() {
 
 		// 賭け金の入力を受け付ける
-		player.setBet(Consts.CPU_BET);
+		setBet(BlackjackSetting.CPU_BET);
 
 		// チップに、ベットを引いた値をセット
-		player.setChip(player.getChip() - player.getBet());
+		setChip(getChip() - getBet());
 	}
 
 	/**
@@ -35,29 +45,29 @@ public class BlackjackPlayerComputer extends BlackjackPlayer {
 	 * @throws SystemErrorException
 	 */
 	@Override
-	public void choice(BlackjackPlayer player) throws SystemErrorException {
+	public void choice(Deck deck) throws SystemErrorException {
 
 		// cpuの得点計算
-		int result = player.getScore();
+		int result = getScore();
 
 		boolean isContinue = false;
 
-		if (result < 17) {
+		if (result < BlackjackSetting.HIT_LINE) {
 			isContinue = true;
 		}
 
 		while (isContinue) {
 
 			// カードを引く
-			player.setHand(getDealer().pick());
+			setHand(deck.pick());
 
 			// 引いたカードの確認
-			checkPickCard(player);
+			checkPickCard();
 
 			// 得点の確認
-			calc(player);
+			calc();
 
-			if (player.getScore() >= 17) {
+			if (getScore() >= BlackjackSetting.HIT_LINE) {
 				isContinue = false;
 			}
 		}
@@ -65,5 +75,4 @@ public class BlackjackPlayerComputer extends BlackjackPlayer {
 		// Enterを押して次へ進む
 		BlackJackInputUtil.getInputEnter();
 	}
-
 }

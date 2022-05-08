@@ -1,7 +1,9 @@
 package cardgame.gamemaster;
 
-import cardgame.Consts;
 import cardgame.card.Card;
+import cardgame.consts.Consts;
+import cardgame.consts.Rank;
+import cardgame.consts.Suit;
 import cardgame.dealer.Dealer;
 import cardgame.deck.Deck;
 import cardgame.exception.SystemErrorException;
@@ -62,16 +64,16 @@ public class BlackJackGameMaster extends GameMaster {
 		deck = new Deck();
 
 		// ♠︎を作成
-		createSuit(Consts.SPADE);
+		createSuit(Suit.SPADE.getSuit());
 
 		// ❤︎を作成
-		createSuit(Consts.HEART);
+		createSuit(Suit.HEART.getSuit());
 
 		// ☘を作成
-		createSuit(Consts.CLOVER);
+		createSuit(Suit.CLOVER.getSuit());
 
 		// ♦︎を作成
-		createSuit(Consts.DAIYA);
+		createSuit(Suit.DAIYA.getSuit());
 	}
 
 	/**
@@ -81,10 +83,7 @@ public class BlackJackGameMaster extends GameMaster {
 	 */
 	public void createSuit(String suit) {
 		for (int i = 1; i <= 13; i++) {
-			Card card = new Card();
-			card.setNum(i);
-			card.setSuit(suit);
-			card.setRank(Consts.numRankMap.get(i));
+			Card card = new Card(i, suit, Rank.numRankMap.get(i));
 			deck.setDeck(card);
 		}
 	}
@@ -105,8 +104,7 @@ public class BlackJackGameMaster extends GameMaster {
 	 */
 	private void createUser() {
 
-		BlackjackPlayer player = new BlackjackPlayerUser();
-		player.setName("YOU");
+		BlackjackPlayer player = new BlackjackPlayerUser("YOU");
 		playerList.getPlayerList().add(player);
 	}
 
@@ -116,8 +114,7 @@ public class BlackJackGameMaster extends GameMaster {
 	private void createComputer() {
 
 		for (int i = 1; i <= 3; i++) {
-			BlackjackPlayer player = new BlackjackPlayerComputer();
-			player.setName("COM" + String.valueOf(i));
+			BlackjackPlayer player = new BlackjackPlayerComputer("COM" + String.valueOf(i));
 			playerList.getPlayerList().add(player);
 		}
 	}
@@ -127,7 +124,7 @@ public class BlackJackGameMaster extends GameMaster {
 	 */
 	public void createDealer() {
 		// ディーラークラスインスタンス化
-		dealer = new Dealer(deck, playerList);
+		dealer = new Dealer(deck);
 	}
 
 	/**
@@ -146,7 +143,7 @@ public class BlackJackGameMaster extends GameMaster {
 		dealer.shuffle();
 
 		// カードを配る
-		dealer.distribute();
+		dealer.distribute(playerList);
 
 		// ディーラーの手札を表示
 		dealer.openCardFirstTime();
@@ -156,11 +153,8 @@ public class BlackJackGameMaster extends GameMaster {
 
 			System.out.println("<<" + player.getName() + "のターン!>>");
 
-			// プレイヤーにディーラーをセット
-			player.setDealer(dealer);
-
 			// プレイヤーアクション
-			player.action(player);
+			player.action(deck);
 
 			System.out.print(Consts.CRLF);
 		}
@@ -171,7 +165,7 @@ public class BlackJackGameMaster extends GameMaster {
 		dealer.action();
 
 		// 勝敗判定
-		dealer.judge();
+		dealer.judge(playerList);
 
 		// 結果出力
 		printResult();

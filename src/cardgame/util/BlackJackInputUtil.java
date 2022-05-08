@@ -124,15 +124,15 @@ public class BlackJackInputUtil {
 
 				// 型チェック
 				if (BlackJackInputUtil.isCorrectInputBet(input)) {
-					System.out.println("賭け金には、数字を入力して下さい。");
+					System.out.println("賭け金は、1〜100を入力して下さい。");
 					continue;
 				}
 
 				// 論理チェック
-				if (0 < Integer.valueOf(input) && Integer.valueOf(input) <= 50) {
+				if (0 < Integer.valueOf(input) && Integer.valueOf(input) <= 100) {
 					isInputOk = true;
 				} else {
-					System.out.println("賭け金は、1〜50で入力して下さい。");
+					System.out.println("賭け金は、1〜100を入力して下さい。");
 				}
 			} catch (IOException e) {
 				throw new SystemErrorException();
