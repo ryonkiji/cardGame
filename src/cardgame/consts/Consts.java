@@ -1,8 +1,5 @@
 package cardgame.consts;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * 定数クラス
  *

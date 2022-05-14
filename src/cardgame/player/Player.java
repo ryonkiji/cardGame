@@ -7,5 +7,4 @@ package cardgame.player;
  *
  */
 public interface Player {
-
 }

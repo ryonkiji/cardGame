@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import cardgame.card.Card;
+import cardgame.consts.Card;
 
 /**
  * Deckクラス
@@ -17,14 +17,18 @@ public class Deck {
 	/**
 	 * 山札
 	 */
-	private List<Card> deck = new ArrayList<>();
+	private List<Card> deck;
 
-	public List<Card> getDeck() {
-		return deck;
-	}
+	/**
+	 * コンストラクタ
+	 */
+	public Deck() {
 
-	public void setDeck(Card card) {
-		this.deck.add(card);
+		deck = new ArrayList<>();
+
+		for (Card card : Card.values()) {
+			deck.add(card);
+		}
 	}
 
 	/**
@@ -50,5 +54,33 @@ public class Deck {
 		deck.remove(0);
 
 		return card;
+	}
+
+	/**
+	 * 21を超えないカードの残り枚数を取得
+	 *
+	 * @param target
+	 * @return
+	 */
+	public int countMoreThan(final int target) {
+		return (int) deck.stream().filter(card -> card.getPoint() > target).count();
+	}
+
+	/**
+	 * 山札の枚数を取得
+	 *
+	 * @return
+	 */
+	public int size() {
+		return deck.size();
+	}
+
+	/**
+	 * 山札にカードを戻す
+	 *
+	 * @param card
+	 */
+	public void receiveCard(Card card) {
+		deck.add(card);
 	}
 }

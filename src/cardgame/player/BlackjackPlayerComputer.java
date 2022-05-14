@@ -58,8 +58,8 @@ public class BlackjackPlayerComputer extends BlackjackPlayer {
 
 		while (isContinue) {
 
-			// カードを引く
-			setHand(deck.pick());
+			// カードを受け取る
+			receiveCard(deck.pick());
 
 			// 引いたカードの確認
 			checkPickCard();

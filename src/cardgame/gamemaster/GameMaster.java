@@ -29,14 +29,9 @@ public abstract class GameMaster {
 	public void execute(String[] args) {
 
 		try {
-			// パラメータチェック
-			// cheackParam(args);
 
 			// 初期処理
 			init();
-
-			// ゲーム準備
-			// prepare();
 
 			// ゲーム開始
 			start();
@@ -47,24 +42,11 @@ public abstract class GameMaster {
 	}
 
 	/**
-	 * パラメータチェック
-	 *
-	 * @param args
-	 * @throws SystemErrorException
-	 */
-	// abstract void cheackParam(String[] args) throws SystemErrorException;
-
-	/**
 	 * 初期処理
 	 *
 	 * @return
 	 */
 	abstract void init();
-
-	/**
-	 * ゲーム準備
-	 */
-	// abstract void prepare();
 
 	/**
 	 * 山札作成

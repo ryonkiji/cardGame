@@ -3,9 +3,8 @@ package cardgame.player;
 import java.util.ArrayList;
 import java.util.List;
 
-import cardgame.card.Card;
+import cardgame.consts.Card;
 import cardgame.consts.Consts;
-import cardgame.dealer.Dealer;
 import cardgame.deck.Deck;
 import cardgame.exception.SystemErrorException;
 import cardgame.util.BlackJackCalcUtil;
@@ -19,11 +18,6 @@ import cardgame.util.BlackJackCalcUtil;
  *
  */
 public abstract class BlackjackPlayer implements Player {
-
-	/**
-	 * Dealer
-	 */
-	private Dealer dealer;
 
 	/**
 	 * 名前
@@ -62,22 +56,6 @@ public abstract class BlackjackPlayer implements Player {
 
 	public String getName() {
 		return name;
-	}
-
-	public Dealer getDealer() {
-		return dealer;
-	}
-
-	public void setDealer(Dealer dealer) {
-		this.dealer = dealer;
-	}
-
-	public List<Card> getHand() {
-		return hand;
-	}
-
-	public void setHand(Card card) {
-		this.hand.add(card);
 	}
 
 	public boolean isCPU() {
@@ -159,7 +137,7 @@ public abstract class BlackjackPlayer implements Player {
 
 		System.out.print("[" + getName() + "] ⇒ 手札：");
 
-		for (Card card : getHand()) {
+		for (Card card : hand) {
 			System.out.print(card.getSuit() + card.getRank() + " ");
 		}
 
@@ -174,7 +152,7 @@ public abstract class BlackjackPlayer implements Player {
 	public void calc() {
 
 		// 手札の得点を計算
-		int result = BlackJackCalcUtil.calcScore(getHand());
+		int result = BlackJackCalcUtil.calcScore(hand);
 
 		// 得点をセット
 		setScore(result);
@@ -200,6 +178,15 @@ public abstract class BlackjackPlayer implements Player {
 	public abstract void choice(Deck deck) throws SystemErrorException;
 
 	/**
+	 * カードを受け取る
+	 *
+	 * @param card
+	 */
+	public void receiveCard(Card card) {
+		hand.add(card);
+	}
+
+	/**
 	 * 引いたカードの確認
 	 *
 	 * @param player
@@ -207,6 +194,37 @@ public abstract class BlackjackPlayer implements Player {
 	public void checkPickCard() {
 
 		// 手札の一番最後の数を表示
-		System.out.println("[" + getName() + "] ⇒ 引いたカード：[" + getHand().get(getHand().size() - 1).getSuit() + getHand().get(getHand().size() - 1).getRank() + "]");
+		System.out.println("[" + getName() + "] ⇒ 引いたカード：[" + hand.get(size() - 1).getSuit() + hand.get(size() - 1).getRank() + "]");
+	}
+
+	/**
+	 * 手札の枚数を取得
+	 *
+	 * @return
+	 */
+	public int size() {
+		return hand.size();
+	}
+
+	/**
+	 * 賭け金の受け取り
+	 *
+	 * @param rate
+	 */
+	public void receiveRefund(int rate) {
+		chip += bet * rate;
+	}
+
+	/**
+	 * 手札を山札に戻す
+	 *
+	 * @param deck
+	 */
+	public void returnCard(Deck deck) {
+
+		// 手札を山札に返却
+		hand.stream().forEach(card -> deck.receiveCard(card));
+		// 手札をクリア
+		hand.clear();
 	}
 }

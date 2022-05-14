@@ -3,8 +3,8 @@ package cardgame.dealer;
 import java.util.ArrayList;
 import java.util.List;
 
-import cardgame.card.Card;
 import cardgame.consts.BlackjackSetting;
+import cardgame.consts.Card;
 import cardgame.consts.Consts;
 import cardgame.deck.Deck;
 import cardgame.exception.SystemErrorException;
@@ -13,6 +13,12 @@ import cardgame.player.BlackjackPlayerList;
 import cardgame.util.BlackJackCalcUtil;
 import cardgame.util.BlackJackInputUtil;
 
+/**
+ * ディーラークラス
+ *
+ * @author kijima
+ *
+ */
 public class Dealer {
 
 	/**
@@ -30,33 +36,10 @@ public class Dealer {
 	 */
 	private int score = 0;
 
-	public Deck getDeck() {
-		return deck;
-	}
-
-	public void setDeck(Deck deck) {
-		this.deck = deck;
-	}
-
-	public void setHand(List<Card> hand) {
-		this.hand = hand;
-	}
-
-	public List<Card> getHand() {
-		return hand;
-	}
-
-	public void setHand(Card card) {
-		this.hand.add(card);
-	}
-
-	public int getScore() {
-		return score;
-	}
-
-	public void setScore(int score) {
-		this.score = score;
-	}
+	/**
+	 * 得点
+	 */
+	private boolean isBurst;
 
 	/**
 	 * コンストラクタ
@@ -89,15 +72,17 @@ public class Dealer {
 	 */
 	public void distribute(BlackjackPlayerList playerList) {
 
-		// ディーラーに手札を配る
+		// 手札を追加
 		for (int j = 0; j < BlackjackSetting.INITIAL_HAND; j++) {
-			setHand(deck.pick());
+			hand.add(deck.pick());
 		}
 
-		// プレイヤーに手札を配る
-		for (BlackjackPlayer player : playerList.getPlayerList()) {
+		// プレイヤーは手札を受け取る
+		for (int i = 0; i < playerList.count(); i++) {
+			BlackjackPlayer player = playerList.get(i);
 			for (int j = 0; j < BlackjackSetting.INITIAL_HAND; j++) {
-				player.setHand(deck.pick());
+				// 手札を受け取る
+				player.receiveCard(deck.pick());
 			}
 		}
 	}
@@ -107,7 +92,7 @@ public class Dealer {
 	 */
 	public void openCardFirstTime() {
 
-		System.out.println("[Dealer] ⇒ [" + getHand().get(0).getSuit() + getHand().get(0).getRank() + "]");
+		System.out.println("[Dealer] ⇒ [" + hand.get(0).getSuit() + hand.get(0).getRank() + "]");
 		System.out.println("[Dealer] ⇒ [?]");
 		System.out.print(Consts.CRLF);
 	}
@@ -127,14 +112,14 @@ public class Dealer {
 
 		boolean isContinue = false;
 
-		if (getScore() < BlackjackSetting.HIT_LINE) {
+		if (score < BlackjackSetting.HIT_LINE) {
 			isContinue = true;
 		}
 
 		while (isContinue) {
 
 			// カードを引く
-			setHand(deck.pick());
+			hand.add(deck.pick());
 
 			// 引いたカードの確認
 			checkPickCard();
@@ -142,7 +127,7 @@ public class Dealer {
 			// 得点計算
 			calc();
 
-			if (getScore() >= BlackjackSetting.HIT_LINE) {
+			if (score >= BlackjackSetting.HIT_LINE) {
 				isContinue = false;
 			}
 		}
@@ -160,7 +145,7 @@ public class Dealer {
 
 		System.out.print("[Dealer] ⇒ 手札：");
 
-		for (Card card : getHand()) {
+		for (Card card : hand) {
 			System.out.print(card.getSuit() + card.getRank() + " ");
 		}
 
@@ -175,12 +160,10 @@ public class Dealer {
 	public void calc() {
 
 		// 手札の得点を計算
-		int result = BlackJackCalcUtil.calcScore(getHand());
+		score = BlackJackCalcUtil.calcScore(hand);
 
-		// 得点をセット
-		setScore(result);
-
-		System.out.println("[Dealer] ⇒ 得点：" + getScore());
+		// バーストチェック
+		System.out.println("[Dealer] ⇒ 得点：" + score);
 	}
 
 	/**
@@ -189,7 +172,7 @@ public class Dealer {
 	private void checkPickCard() {
 
 		// 手札の一番最後の数を表示
-		System.out.println("[Dealer] ⇒ 引いたカード：" + getHand().get(getHand().size() - 1).getSuit() + getHand().get(getHand().size() - 1).getRank());
+		System.out.println("[Dealer] ⇒ 引いたカード：" + hand.get(size() - 1).getSuit() + hand.get(size() - 1).getRank());
 	}
 
 	/**
@@ -199,49 +182,95 @@ public class Dealer {
 	 */
 	public void judge(BlackjackPlayerList playerList) {
 
+		BlackjackPlayer player;
+
 		// ディーラーの得点
-		int dealerPoint = getScore();
+		int dealerPoint = score;
 
-		// ディーラーがバーストしていない場合
-		if (dealerPoint <= BlackjackSetting.BURST_LINE) {
+		// バーストしているか判定
+		isBurst(score);
 
-			for (BlackjackPlayer player : playerList.getPlayerList()) {
+		// 勝敗を判定
+		for (int i = 0; i < playerList.count(); i++) {
+			player = playerList.get(i);
 
-				// 得点が21を超える場合バースト
-				if (player.getScore() > BlackjackSetting.BURST_LINE) {
-					player.setWinLoseCode(Consts.LOSE_CODE);
-				} else {
-					// 勝利
-					if (dealerPoint < player.getScore()) {
-						player.setWinLoseCode(Consts.WIN_CODE);
-						player.setChip(player.getChip() + player.getBet() * 2);
-					}
-					// 敗北
-					else if (dealerPoint > player.getScore()) {
-						player.setWinLoseCode(Consts.LOSE_CODE);
-					}
-					// 引き分け
-					else {
-						player.setWinLoseCode(Consts.DROW_CODE);
-						player.setChip(player.getChip() + player.getBet());
-					}
-				}
+			// プレーヤーがバーストしている場合
+			if (player.getScore() > BlackjackSetting.BURST_LINE) {
+				player.setWinLoseCode(Consts.LOSE_CODE);
+				continue;
+			}
+			// ディーラーがバーストしている場合
+			else if (isBurst) {
+				player.setWinLoseCode(Consts.WIN_CODE);
+				// player.setChip(player.getChip() + player.getBet() * 2);
+				continue;
+			}
+			// ディーラー得点がプレイヤー得点より高い場合
+			else if (dealerPoint < player.getScore()) {
+				player.setWinLoseCode(Consts.WIN_CODE);
+				// player.setChip(player.getChip() + player.getBet() * 2);
+				continue;
+			}
+			// プレイヤー得点がディーラー得点より高い場合
+			else if (dealerPoint > player.getScore()) {
+				player.setWinLoseCode(Consts.LOSE_CODE);
+			}
+			// 引き分け
+			else if (dealerPoint == player.getScore()) {
+
+				player.setWinLoseCode(Consts.DROW_CODE);
+				// player.setChip(player.getChip() + player.getBet());
+			}
+
+		}
+
+		// 賭け金を分配
+		for (int i = 0; i < playerList.count(); i++) {
+			player = playerList.get(i);
+
+			// 勝者は賭け金の2倍のチップを受領
+			if (Consts.WIN_CODE.equals(player.getWinLoseCode())) {
+				player.receiveRefund(2);
+			}
+			// 引分者は賭け金の2倍のチップを受領
+			else if (Consts.DROW_CODE.equals(player.getWinLoseCode())) {
+				player.receiveRefund(1);
 			}
 		}
-		// ディーラーがバーストしている場合
-		else {
-			for (BlackjackPlayer player : playerList.getPlayerList()) {
+	}
 
-				// 21を超えていなければ勝ち
-				if (player.getScore() <= BlackjackSetting.BURST_LINE) {
-					player.setWinLoseCode(Consts.WIN_CODE);
-					player.setChip(player.getChip() + player.getBet() * 2);
-				}
-				// 21を超えていれば負け
-				else {
-					player.setWinLoseCode(Consts.LOSE_CODE);
-				}
-			}
+	/**
+	 * バーストしているかを判定
+	 *
+	 * @param score
+	 */
+	public void isBurst(int score) {
+		if (score > 21) {
+			isBurst = true;
+		} else {
+			isBurst = false;
 		}
+	}
+
+	/**
+	 * 手札の枚数を取得
+	 *
+	 * @return
+	 */
+	public int size() {
+		return hand.size();
+	}
+
+	/**
+	 * 手札を山札に戻す
+	 *
+	 * @param deck
+	 */
+	public void returnCard(Deck deck) {
+
+		// 手札を山札に返却
+		hand.stream().forEach(card -> deck.receiveCard(card));
+		// 手札をクリア
+		hand.clear();
 	}
 }

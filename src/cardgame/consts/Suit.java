@@ -8,13 +8,9 @@ package cardgame.consts;
  */
 public enum Suit {
 
-	// スペード
 	SPADE("♠︎"),
-	// ダイヤ
 	DAIYA("♦︎"),
-	// クローバー
 	CLOVER("☘"),
-	// ハート
 	HEART("❤︎");
 
 	/**
@@ -34,7 +30,6 @@ public enum Suit {
 	/**
 	 * スートを返却
 	 *
-	 * @param suit
 	 * @return
 	 */
 	public String getSuit() {

@@ -1,8 +1,5 @@
 package cardgame.player;
 
-import java.util.List;
-
-import cardgame.card.Card;
 import cardgame.deck.Deck;
 import cardgame.exception.SystemErrorException;
 import cardgame.util.BlackJackCalcUtil;
@@ -53,12 +50,12 @@ public class BlackjackPlayerUser extends BlackjackPlayer {
 		// ヒットかステイか入力を受け付ける
 		String input = BlackJackInputUtil.getInputParam();
 
-		boolean isContinue = isContinue(input, getScore(), deck.getDeck());
+		boolean isContinue = isContinue(input, getScore(), deck);
 
 		while (isContinue) {
 
-			// カードを引く
-			setHand(deck.pick());
+			// カードを受け取る
+			receiveCard(deck.pick());
 
 			// 引いたカードの確認
 			checkPickCard();
@@ -66,7 +63,7 @@ public class BlackjackPlayerUser extends BlackjackPlayer {
 			// 得点の確認
 			calc();
 
-			if (getScore() <= 21) {
+			if (getScore() < 21) {
 				// // カードを引くかどうかの判定
 				input = BlackJackInputUtil.getInputParam();
 			} else {
@@ -74,7 +71,7 @@ public class BlackjackPlayerUser extends BlackjackPlayer {
 			}
 
 			// 継続か判定
-			isContinue = isContinue(input, getScore(), deck.getDeck());
+			isContinue = isContinue(input, getScore(), deck);
 		}
 	}
 
@@ -88,7 +85,7 @@ public class BlackjackPlayerUser extends BlackjackPlayer {
 	 * @return
 	 * @throws SystemErrorException
 	 */
-	public boolean isContinue(String input, int score, List<Card> deck) throws SystemErrorException {
+	public boolean isContinue(String input, int score, Deck deck) throws SystemErrorException {
 
 		boolean isContinue = false;
 

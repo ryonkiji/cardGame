@@ -1,20 +1,14 @@
 package cardgame.gamemaster;
 
-import cardgame.card.Card;
 import cardgame.consts.Consts;
-import cardgame.consts.Rank;
-import cardgame.consts.Suit;
 import cardgame.dealer.Dealer;
 import cardgame.deck.Deck;
 import cardgame.exception.SystemErrorException;
 import cardgame.player.BlackjackPlayer;
-import cardgame.player.BlackjackPlayerComputer;
 import cardgame.player.BlackjackPlayerList;
-import cardgame.player.BlackjackPlayerUser;
 import cardgame.util.BlackJackInputUtil;
 
 /**
- *
  * BlackJackゲームマスタークラス
  *
  * @author kijima
@@ -60,32 +54,8 @@ public class BlackJackGameMaster extends GameMaster {
 	 */
 	public void createDeck() {
 
-		// 山札クラスをインスタンス化
+		// Deckクラスをインスタンス化
 		deck = new Deck();
-
-		// ♠︎を作成
-		createSuit(Suit.SPADE.getSuit());
-
-		// ❤︎を作成
-		createSuit(Suit.HEART.getSuit());
-
-		// ☘を作成
-		createSuit(Suit.CLOVER.getSuit());
-
-		// ♦︎を作成
-		createSuit(Suit.DAIYA.getSuit());
-	}
-
-	/**
-	 * スートを作成
-	 *
-	 * @param suit
-	 */
-	public void createSuit(String suit) {
-		for (int i = 1; i <= 13; i++) {
-			Card card = new Card(i, suit, Rank.numRankMap.get(i));
-			deck.setDeck(card);
-		}
 	}
 
 	/**
@@ -95,28 +65,6 @@ public class BlackJackGameMaster extends GameMaster {
 
 		// BlackjackPlayerListクラスインスタンス化
 		playerList = new BlackjackPlayerList();
-		createUser();
-		createComputer();
-	}
-
-	/**
-	 * ユーザーを作成し、プレイヤーリストに追加
-	 */
-	private void createUser() {
-
-		BlackjackPlayer player = new BlackjackPlayerUser("YOU");
-		playerList.getPlayerList().add(player);
-	}
-
-	/**
-	 * コンピューターを作成し、プレイヤーリストに追加
-	 */
-	private void createComputer() {
-
-		for (int i = 1; i <= 3; i++) {
-			BlackjackPlayer player = new BlackjackPlayerComputer("COM" + String.valueOf(i));
-			playerList.getPlayerList().add(player);
-		}
 	}
 
 	/**
@@ -149,7 +97,9 @@ public class BlackJackGameMaster extends GameMaster {
 		dealer.openCardFirstTime();
 
 		// プレイヤーアクション
-		for (BlackjackPlayer player : playerList.getPlayerList()) {
+		for (int i = 0; i < playerList.count(); i++) {
+
+			BlackjackPlayer player = playerList.get(i);
 
 			System.out.println("<<" + player.getName() + "のターン!>>");
 
@@ -181,7 +131,8 @@ public class BlackJackGameMaster extends GameMaster {
 
 		System.out.println("<<結果発表>>");
 
-		for (BlackjackPlayer player : playerList.getPlayerList()) {
+		for (int i = 0; i < playerList.count(); i++) {
+			BlackjackPlayer player = playerList.get(i);
 			System.out.println("[" + player.getName() + "]：" + player.getWinLoseCode() + " チップ総額：" + player.getChip());
 		}
 
@@ -195,30 +146,27 @@ public class BlackJackGameMaster extends GameMaster {
 	 */
 	public void isContinue() throws SystemErrorException {
 
-		if (round < 3) {
-			System.out.println("<<もう一度プレイしますか？>>");
+		System.out.println("<<もう一度プレイしますか？>>");
 
-			// ゲームを続けるか入力を受け付ける
-			String input = BlackJackInputUtil.getInputContinue();
+		// ゲームを続けるか入力を受け付ける
+		String input = BlackJackInputUtil.getInputContinue();
 
-			if ("y".equals(input)) {
+		if ("y".equals(input)) {
 
-				// ラウンドを追加
-				round++;
+			// ラウンドを追加
+			round++;
 
-				// プレイヤーの手札を初期化
-				for (BlackjackPlayer player : playerList.getPlayerList()) {
-					player.getHand().clear();
-				}
+			for (int i = 0; i < playerList.count(); i++) {
+				BlackjackPlayer player = playerList.get(i);
 
-				// ディーラーの手札を初期化
-				dealer.getHand().clear();
-
-				start();
-			} else {
-				// ブラックジャック終了のメッセージを出力
-				System.out.println("<<Thank you for playing Blackjack!>>");
+				// 手札を山札に戻す
+				player.returnCard(deck);
 			}
+
+			// 手札を山札に戻す
+			dealer.returnCard(deck);
+
+			start();
 		} else {
 			// ブラックジャック終了のメッセージを出力
 			System.out.println("<<Thank you for playing Blackjack!>>");

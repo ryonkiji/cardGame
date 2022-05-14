@@ -1,6 +1,6 @@
 package cardgame;
 
-import cardgame.consts.GameId;
+import cardgame.consts.GameType;
 import cardgame.gamemaster.BlackJackGameMaster;
 import cardgame.gamemaster.GameMaster;
 
@@ -30,7 +30,7 @@ public class CardGame {
 		if (args == null || args.length == 0) {
 
 			System.out.println("ゲーム種目番号を入力して下さい。");
-		} else if (GameId.BLACK_JACK.equals(args[0])) {
+		} else if (GameType.BLACKJACK.getId().equals(args[0])) {
 
 			game = new BlackJackGameMaster();
 		} else {
